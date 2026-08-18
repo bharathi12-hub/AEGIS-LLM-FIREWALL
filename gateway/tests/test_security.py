@@ -7,7 +7,9 @@ import unittest
 
 from app.observability.logging import sanitize_for_render, strip_control
 from app.pipeline.judge import evaluate
-from app.security.modelscan import UnsafeModelError, assert_safetensors_only, scan_dir
+from app.security.modelscan import (EXIT_BAD_ROOT, EXIT_CLEAN, EXIT_UNSAFE,
+                                    UnsafeModelError, assert_safetensors_only,
+                                    ci_scan, scan_dir)
 from app.security.ratelimit import JudgeBudget, TokenBucket
 from app.security.timing import normalized_delay
 
@@ -24,6 +26,38 @@ class TestModelSupplyChain(unittest.TestCase):  # S3
             open(os.path.join(d, "model.safetensors"), "wb").close()
             assert_safetensors_only(d)  # no raise
             self.assertTrue(scan_dir(d)["ok"])
+
+    # --- ci_scan: the gate CI and `make modelscan` actually invoke ---
+
+    def test_ci_scan_flags_pickle_checkpoint(self):
+        with tempfile.TemporaryDirectory() as d:
+            mdir = os.path.join(d, "m1")
+            os.makedirs(mdir)
+            open(os.path.join(mdir, "pytorch_model.bin"), "wb").close()
+            self.assertEqual(ci_scan(d), EXIT_UNSAFE)
+
+    def test_ci_scan_passes_safetensors_only(self):
+        with tempfile.TemporaryDirectory() as d:
+            mdir = os.path.join(d, "m1")
+            os.makedirs(mdir)
+            open(os.path.join(mdir, "model.safetensors"), "wb").close()
+            self.assertEqual(ci_scan(d), EXIT_CLEAN)
+
+    def test_ci_scan_fails_on_missing_root(self):
+        """A gate that cannot reach its target must not report success.
+
+        A typo'd path used to exit 0 having scanned nothing, silently
+        disarming S3 in CI.
+        """
+        with tempfile.TemporaryDirectory() as d:
+            missing = os.path.join(d, "no-such-dir")
+            self.assertEqual(ci_scan(missing), EXIT_BAD_ROOT)
+
+    def test_ci_scan_clean_on_valid_root_with_no_models(self):
+        """No weights in a real tree is a legitimate pass (the repo ships none)."""
+        with tempfile.TemporaryDirectory() as d:
+            open(os.path.join(d, "README.md"), "w").close()
+            self.assertEqual(ci_scan(d), EXIT_CLEAN)
 
 
 class TestJudgeHardening(unittest.TestCase):  # S1

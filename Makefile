@@ -1,5 +1,6 @@
 # AEGIS v2 — developer entrypoints (R2).
-.PHONY: up down test bench bench-surfaces bench-audit bench-all seed redteam lint console modelscan
+.PHONY: up down test bench bench-surfaces bench-audit bench-all seed redteam \
+        lint console modelscan loadtest backup verify-models
 
 # Bring up the full stack (gateway + redis + postgres + dashboard), offline.
 up:
@@ -11,6 +12,16 @@ down:
 # Run the test suite. Uses pytest if available, else stdlib unittest (offline).
 test:
 	cd gateway && (python -m pytest -q || python -m unittest discover -s tests -p "test_*.py")
+
+# Lint. compileall is the stdlib floor and always runs; ruff runs when present.
+# A missing ruff is reported, never silently skipped.
+lint:
+	python -m compileall -q gateway/app benchmark redteam loadtest scripts
+	@if command -v ruff >/dev/null 2>&1; then \
+		ruff check gateway/app benchmark redteam loadtest scripts; \
+	else \
+		echo "NOTE: ruff not installed — ran compileall only (pip install ruff)"; \
+	fi
 
 # Benchmark + red-team + report (writes benchmark/out/). Offline, real numbers.
 bench:
@@ -37,8 +48,10 @@ redteam:
 	python -m redteam.run_redteam
 
 # CI model-supply-chain scan: fail on any non-safetensors checkpoint (S3).
+# Scans the whole repo root, matching .github/workflows/ci.yml, so a stray
+# checkpoint outside models/ is caught too. No `|| true` — this gate must fail.
 modelscan:
-	cd gateway && python -m app.security.modelscan ../models || true
+	cd gateway && python -m app.security.modelscan ..
 
 # Quick local inspection console (no server needed).
 console:

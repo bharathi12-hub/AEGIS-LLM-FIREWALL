@@ -82,21 +82,43 @@ def _sha256(path: str) -> str:
     return h.hexdigest()
 
 
+# ci_scan exit codes.
+EXIT_CLEAN = 0
+EXIT_UNSAFE = 1
+EXIT_BAD_ROOT = 2
+
+
 def ci_scan(root: str) -> int:
-    """Entry point for CI: scan every model dir under root; nonzero exit on unsafe."""
+    """Entry point for CI: scan every model dir under root; nonzero exit on unsafe.
+
+    Returns ``EXIT_BAD_ROOT`` when ``root`` does not exist. A gate that cannot
+    reach its target must not report success: a typo in the CI invocation used
+    to exit 0 having scanned nothing, silently disarming S3. Finding no model
+    directories under a *valid* root is a legitimate clean result (the repo
+    ships no weights), so that still exits 0 — but the summary line below always
+    prints, so "scanned nothing" is never mistaken for "scanned and clean".
+    """
+    if not os.path.isdir(root):
+        print(f"ERROR   {root}: not a directory — nothing was scanned")
+        return EXIT_BAD_ROOT
+
     problems = 0
+    scanned = 0
     for candidate in glob.glob(os.path.join(root, "**"), recursive=True):
         if os.path.isdir(candidate) and any(
             f.endswith(".safetensors") or os.path.splitext(f)[1].lower() in _PICKLE_EXTS
             for f in os.listdir(candidate) if os.path.isfile(os.path.join(candidate, f))
         ):
+            scanned += 1
             report = scan_dir(candidate)
             if report["unsafe_pickles"]:
                 print(f"UNSAFE  {candidate}: {report['unsafe_pickles']}")
                 problems += 1
             else:
                 print(f"ok      {candidate}: {len(report['safetensors'])} safetensors")
-    return 1 if problems else 0
+
+    print(f"scanned {scanned} model dir(s) under {root}; {problems} unsafe")
+    return EXIT_UNSAFE if problems else EXIT_CLEAN
 
 
 if __name__ == "__main__":
