@@ -1,0 +1,33 @@
+# Default-deny egress/ingress; only the flows the gateway actually needs (S10).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: aegis-gateway
+  namespace: aegis
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: aegis, app.kubernetes.io/component: gateway }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    # Only the ingress controller may reach the gateway.
+    - from:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: ingress-nginx }
+      ports:
+        - { protocol: TCP, port: 8080 }
+  egress:
+    # Postgres + Redis in-namespace.
+    - to:
+        - podSelector: { matchLabels: { app.kubernetes.io/name: aegis } }
+      ports:
+        - { protocol: TCP, port: 5432 }
+        - { protocol: TCP, port: 6379 }
+    # DNS.
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    # HTTPS to the IdP (JWKS) and, if configured, a real upstream LLM.
+    - ports:
+        - { protocol: TCP, port: 443 }

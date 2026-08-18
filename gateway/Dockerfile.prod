@@ -1,0 +1,42 @@
+# AEGIS v2 gateway — production image (multi-stage, non-root, gunicorn workers).
+# Build:  docker build -f gateway/Dockerfile.prod -t aegis-gateway:prod gateway
+#   optional real models:  --build-arg INSTALL_ML=true  --build-arg INSTALL_DB=true
+
+# ---- builder ----
+FROM python:3.11-slim AS builder
+ENV PIP_NO_CACHE_DIR=1 PYTHONDONTWRITEBYTECODE=1
+WORKDIR /build
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+ARG INSTALL_ML=false
+ARG INSTALL_DB=true
+COPY pyproject.toml ./
+RUN pip install --upgrade pip && pip install . \
+    && if [ "$INSTALL_DB" = "true" ]; then pip install "psycopg[binary]==3.2.1"; fi \
+    && if [ "$INSTALL_ML" = "true" ]; then pip install ".[ml]"; fi
+
+# ---- runtime ----
+FROM python:3.11-slim AS runtime
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONUTF8=1 \
+    PATH="/opt/venv/bin:$PATH"
+# tini for correct signal handling / zombie reaping.
+RUN apt-get update && apt-get install -y --no-install-recommends tini curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --uid 10001 --shell /usr/sbin/nologin aegis
+
+COPY --from=builder /opt/venv /opt/venv
+WORKDIR /app
+COPY app ./app
+COPY rules ./rules
+COPY policies ./policies
+COPY gunicorn_conf.py ./
+RUN chown -R aegis /app
+USER aegis
+
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=5 \
+  CMD curl -fsS http://localhost:8080/readyz || exit 1
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["gunicorn", "app.main:app", "-c", "gunicorn_conf.py"]

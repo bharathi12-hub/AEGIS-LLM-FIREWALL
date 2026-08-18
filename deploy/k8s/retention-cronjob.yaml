@@ -1,0 +1,33 @@
+# Nightly audit-retention purge (S7) as a CronJob (belt-and-braces alongside the
+# in-process loop, so purging happens even if all gateway pods are down).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: aegis-retention
+  namespace: aegis
+spec:
+  schedule: "17 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: retention
+              image: ghcr.io/example/aegis-gateway:prod
+              command: ["python", "-m", "app.observability.retention"]
+              envFrom:
+                - configMapRef: { name: aegis-config }
+                - secretRef: { name: aegis-secrets }
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }

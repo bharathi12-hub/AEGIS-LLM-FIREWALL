@@ -1,0 +1,15 @@
+surface,detector,detection_rate,fpr,precision,recall,f1,tp,fn,fp,tn
+browser,aegis_v21,1.0,0.0,1.0,1.0,1.0,10,0,0,10
+browser,baseline_v20_flattened,0.4,0.0,1.0,0.4,0.5714,4,6,0,10
+documents,aegis_v21,1.0,0.0,1.0,1.0,1.0,10,0,0,10
+documents,baseline_v20_flattened,0.5,0.1,0.8333,0.5,0.625,5,5,1,9
+rag,aegis_v21,1.0,0.0,1.0,1.0,1.0,8,0,0,8
+rag,baseline_v20_flattened,0.125,0.125,0.5,0.125,0.2,1,7,1,7
+memory,aegis_v21,1.0,0.0,1.0,1.0,1.0,8,0,0,8
+memory,baseline_v20_flattened,0.125,0.0,1.0,0.125,0.2222,1,7,0,8
+tools,aegis_v21,1.0,0.0,1.0,1.0,1.0,12,0,0,8
+tools,baseline_v20_flattened,0.0833,0.0,1.0,0.0833,0.1538,1,11,0,8
+agent,aegis_v21,1.0,0.0,1.0,1.0,1.0,6,0,0,6
+agent,baseline_v20_flattened,0.0,0.0,0.0,0.0,0.0,0,6,0,6
+multimodal,aegis_v21,1.0,0.0,1.0,1.0,1.0,4,0,0,4
+multimodal,baseline_v20_flattened,0.0,0.0,0.0,0.0,0.0,0,4,0,4

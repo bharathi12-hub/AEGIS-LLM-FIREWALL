@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aegis-gateway
+  namespace: aegis
+  labels: { app.kubernetes.io/name: aegis, app.kubernetes.io/component: gateway }
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app.kubernetes.io/name: aegis, app.kubernetes.io/component: gateway }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: aegis, app.kubernetes.io/component: gateway }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: aegis-gateway
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: { type: RuntimeDefault }
+      # DB schema migration runs to completion before the app starts.
+      initContainers:
+        - name: migrate
+          image: ghcr.io/example/aegis-gateway:prod
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef: { name: aegis-config }
+            - secretRef: { name: aegis-secrets }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+      containers:
+        - name: gateway
+          image: ghcr.io/example/aegis-gateway:prod
+          ports: [{ containerPort: 8080, name: http }]
+          envFrom:
+            - configMapRef: { name: aegis-config }
+            - secretRef: { name: aegis-secrets }
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits: { cpu: "2", memory: "2Gi" }
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          startupProbe:
+            httpGet: { path: /readyz, port: http }
+            failureThreshold: 30
+            periodSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: models
+              mountPath: /models
+              readOnly: true
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: models
+          persistentVolumeClaim: { claimName: aegis-models }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app.kubernetes.io/name: aegis }
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aegis-gateway
+  namespace: aegis

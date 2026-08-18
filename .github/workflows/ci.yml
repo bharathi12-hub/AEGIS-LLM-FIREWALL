@@ -1,0 +1,36 @@
+name: aegis-ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-and-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # The detection engine + benchmark are pure stdlib — no install needed to test.
+      - name: Unit tests (stdlib profile)
+        run: |
+          cd gateway
+          python -m unittest discover -s tests -p "test_*.py"
+
+      # S3: model supply-chain scan — fail on any non-safetensors checkpoint.
+      - name: Model scan (safetensors-only)
+        run: |
+          cd gateway
+          python -m app.security.modelscan ..
+
+      - name: Benchmark + red-team (real numbers)
+        run: |
+          python -m benchmark.run_benchmark
+          python -m redteam.run_redteam
+
+      - name: Upload benchmark report
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report
+          path: benchmark/out/

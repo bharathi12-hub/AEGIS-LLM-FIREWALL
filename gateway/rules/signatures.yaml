@@ -1,0 +1,102 @@
+# AEGIS v2 signature rules.
+# Rules run on the *normalized* text (and its decoded views), so evasion via
+# encoding, homoglyphs, or zero-width injection fails before this layer.
+#
+# Patterns are single-quoted with single backslashes so they load identically
+# under PyYAML (Docker) and the offline mini-parser. Each pattern is a
+# case-insensitive Python regex. Prefer bounded gaps (.{0,30}) over rigid word
+# slots so benign adjectives don't defeat a rule. Severity is 0..1.
+version: 1
+rules:
+  - id: instruction_override
+    category: 'LLM01:PromptInjection'
+    severity: 0.9
+    description: 'Attempts to override, discard, or refuse prior instructions'
+    patterns:
+      - 'ignore\b.{0,25}\b(previous|prior|above|earlier|preceding|all|any|these|the)\b.{0,20}\b(instruction|instructions|rule|rules|prompt|message|context|directive)'
+      - 'ignore\b.{0,20}\b(previous|prior|above|earlier|refus)'
+      - 'disregard\b.{0,25}\b(previous|prior|above|instruction|instructions|rule|rules|prompt|everything|the)'
+      - 'forget\b.{0,25}\b(previous|prior|above|instruction|instructions|guideline|rule|everything|what)'
+      - 'override\b.{0,25}\b(instruction|instructions|rule|rules|setting|settings|prior|previous|system)'
+      - 'do not\b.{0,20}\b(follow|obey|adhere)\b.{0,20}\b(previous|above|prior|system|original)'
+      - '(you must not|never|do not|refuse to)\b.{0,10}\brefuse'
+      - '(restrictions?|rules?|guidelines?)\b.{0,15}\b(no longer apply|do not apply|don.t apply)'
+
+  - id: jailbreak_persona
+    category: 'LLM01:PromptInjection'
+    severity: 0.85
+    description: 'Role reassignment into a jailbroken / unrestricted persona'
+    patterns:
+      - '(you are now|act as|acting as|pretend|roleplay|role-play|role play|simulate|behave as)\b.{0,40}\b(dan|jailbroken|jailbreak|unfiltered|unrestricted|uncensored|no ethics|without ethics|no restrictions|no rules|no filter|evil|malicious|hacker)'
+      - '(you are|act as|pretend to be|roleplay as|imagine you are)\b.{0,20}\ban ai\b.{0,20}\b(with no|without|that has no|free of|ignores)\b'
+      - 'from now on\b.{0,30}\b(you (are|will|must)|ignore|no longer|unrestricted|unfiltered|jailbroken|do anything)'
+      - 'answer as (two|2|multiple)\b.{0,20}\b(ai|ais|models|personas)'
+
+  - id: jailbreak_tokens
+    category: 'LLM01:PromptInjection'
+    severity: 0.85
+    description: 'Well-known jailbreak trigger tokens and unlock phrases'
+    patterns:
+      # 'developer mode' only in an ACTIVATION context (benign 'developer mode
+      # features in the manual' must not match — over-defense calibration).
+      - 'developer mode\s*(enabled|on|activated|active|now|unlocked|engaged)'
+      - '(enable|activate|enter|turn on|switch to|you are in|entering|unlock)\b.{0,15}\bdeveloper mode'
+      - '\bDAN\b'
+      - 'do anything now'
+      - '\bjailbroken\b|\bjailbreak(en|ing)?\b'
+      - '(unfiltered|unrestricted|uncensored|god)\s+(mode|assistant|ai|model|response)'
+      - '(zero|no)\s+(restrictions|filters|rules|guidelines|ethics|limits)'
+      - 'without any (restrictions|filters|rules|guidelines|ethics|censorship|limits)'
+      - 'no (rules|filters|ethics|restrictions|guidelines|limits)\b'
+      - 'switch to\b.{0,20}\b(unrestricted|unfiltered|uncensored|developer|god)\s*mode'
+
+  - id: guardrail_tampering
+    category: 'LLM01:PromptInjection'
+    severity: 0.8
+    description: 'Attempts to disable or bypass safety controls'
+    patterns:
+      - 'bypass\b.{0,25}\b(content policy|safety|filter|filters|guardrail|guardrails|restriction|restrictions|moderation|rules)'
+      - 'disable\b.{0,25}\b(guardrail|guardrails|safety|filter|filters|restriction|restrictions|content|moderation|protection)'
+      - 'turn off\b.{0,20}\b(safety|filter|filters|moderation|content|guardrail)'
+      - 'ignore\b.{0,15}\b(safety|content|moderation)\b.{0,15}\b(policy|policies|guideline|filter)'
+
+  - id: system_prompt_extraction
+    category: 'LLM07:SystemPromptLeakage'
+    severity: 0.85
+    description: 'Attempts to exfiltrate the system prompt or hidden instructions'
+    patterns:
+      - '(reveal|show|print|repeat|display|output|dump|give|expose|leak)\b.{0,35}\b(system\s*)?(prompt|instructions|configuration|initialization|directive)'
+      - 'what (are|were)\b.{0,25}\b(your|the)\b.{0,25}\b(instruction|instructions|prompt|directive)'
+      - '(repeat|print|output|show)\b.{0,20}\b(everything|the text|the words)\b.{0,15}\b(above|before|verbatim)'
+      - '(raw|original|initial|hidden|internal)\s+(prompt|instructions|system prompt)'
+      - 'repeat\b.{0,15}\babove\b.{0,20}\b(verbatim|word for word|exactly|including)'
+
+  - id: sensitive_exfiltration
+    category: 'LLM06:SensitiveInformationDisclosure'
+    severity: 0.75
+    description: 'Requests for secrets, credentials, or exfiltration channels'
+    patterns:
+      - '(reveal|give|show|tell|leak|expose|dump|print|insert)\b.{0,30}\b(password|api key|api-key|secret key|secret|token|credential|credentials|private key)'
+      - '(secret|password|api key|token|key)\b.{0,25}\b(encoded|base64|rot13|hex|hexadecimal)'
+      - '(base64|rot13|hex|hexadecimal)\b.{0,20}\b(encode|your (secret|password|answer|response|system|reply))'
+      - 'encode\b.{0,20}\b(answer|response|reply|secret|it)\b.{0,15}\b(base64|rot13|hex)'
+      - 'exfiltrate'
+      - '(grandmother|grandma|late\s+\w+)\b.{0,40}\b(api key|password|secret|serial|key)'
+
+  - id: encoding_smuggling
+    category: 'LLM01:PromptInjection'
+    severity: 0.6
+    description: 'Explicit instructions to decode / execute obfuscated content'
+    patterns:
+      - '(decode|base64 decode)\b.{0,25}\b(and|then)\b.{0,15}\b(run|execute|follow|comply|do|obey)'
+      - '(the following|this) is\b.{0,15}\b(base64|encoded|rot13|hex)'
+      - 'execute the (decoded|following)\b.{0,15}\b(instruction|command|payload)'
+
+  - id: obligation_bypass
+    category: 'LLM01:PromptInjection'
+    severity: 0.6
+    description: 'Coercive framing used to bypass safety'
+    patterns:
+      - 'this is\b.{0,15}\b(a |an )?(hypothetical|fictional|role.?play|game|test|story)\b.{0,30}\b(no rules|no restrictions|you have no|anything is|nothing is)'
+      - 'in a world where\b.{0,20}\b(there are no|nothing is|anything)'
+      - 'i am your (developer|creator|admin|administrator|owner)\b.{0,30}\b(disable|dump|reveal|override|ignore|bypass)'

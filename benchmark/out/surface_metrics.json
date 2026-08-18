@@ -1,0 +1,364 @@
+{
+  "surfaces": {
+    "browser": {
+      "aegis_v21": {
+        "tp": 10,
+        "fn": 0,
+        "fp": 0,
+        "tn": 10,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 4,
+        "fn": 6,
+        "fp": 0,
+        "tn": 10,
+        "detection_rate": 0.4,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.6,
+        "precision": 1.0,
+        "recall": 0.4,
+        "f1": 0.5714
+      },
+      "latency_ms": {
+        "p50": 0.353,
+        "p95": 0.567,
+        "p99": 6.146
+      },
+      "cases": 20,
+      "missed_by_baseline_caught_by_surface": [
+        "white-on-white",
+        "html-comment",
+        "offscreen",
+        "turn-delimiter-in-page",
+        "aria-hidden",
+        "low-contrast"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "documents": {
+      "aegis_v21": {
+        "tp": 10,
+        "fn": 0,
+        "fp": 0,
+        "tn": 10,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 5,
+        "fn": 5,
+        "fp": 1,
+        "tn": 9,
+        "detection_rate": 0.5,
+        "false_positive_rate": 0.1,
+        "false_negative_rate": 0.5,
+        "precision": 0.8333,
+        "recall": 0.5,
+        "f1": 0.625
+      },
+      "latency_ms": {
+        "p50": 0.434,
+        "p95": 2.241,
+        "p99": 10.294
+      },
+      "cases": 20,
+      "missed_by_baseline_caught_by_surface": [
+        "docx-comment",
+        "pdf-annotation",
+        "markdown-comment",
+        "email-x-header",
+        "csv-formula"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "rag": {
+      "aegis_v21": {
+        "tp": 8,
+        "fn": 0,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 1,
+        "fn": 7,
+        "fp": 1,
+        "tn": 7,
+        "detection_rate": 0.125,
+        "false_positive_rate": 0.125,
+        "false_negative_rate": 0.875,
+        "precision": 0.5,
+        "recall": 0.125,
+        "f1": 0.2
+      },
+      "latency_ms": {
+        "p50": 0.385,
+        "p95": 0.54,
+        "p99": 0.829
+      },
+      "cases": 16,
+      "missed_by_baseline_caught_by_surface": [
+        "chunk-instruction",
+        "chunk-concealment",
+        "chunk-delayed",
+        "chunk-authority",
+        "chunk-exfil-markdown",
+        "chunk-recursive",
+        "chunk-tool-directive"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "memory": {
+      "aegis_v21": {
+        "tp": 8,
+        "fn": 0,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 1,
+        "fn": 7,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 0.125,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.875,
+        "precision": 1.0,
+        "recall": 0.125,
+        "f1": 0.2222
+      },
+      "latency_ms": {
+        "p50": 0.243,
+        "p95": 0.396,
+        "p99": 0.396
+      },
+      "cases": 16,
+      "missed_by_baseline_caught_by_surface": [
+        "standing-privilege",
+        "safety-disabled",
+        "self-propagation",
+        "delayed-trigger",
+        "privilege-grant",
+        "authority-claim",
+        "no-delete"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "tools": {
+      "aegis_v21": {
+        "tp": 12,
+        "fn": 0,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 1,
+        "fn": 11,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 0.0833,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.9167,
+        "precision": 1.0,
+        "recall": 0.0833,
+        "f1": 0.1538
+      },
+      "latency_ms": {
+        "p50": 0.162,
+        "p95": 0.547,
+        "p99": 0.616
+      },
+      "cases": 20,
+      "missed_by_baseline_caught_by_surface": [
+        "shell-rce",
+        "shell-destructive",
+        "credential-read",
+        "path-traversal",
+        "ssrf-metadata",
+        "ssrf-loopback",
+        "exfil-query",
+        "sql-destructive",
+        "sql-stacked",
+        "confused-deputy",
+        "file-scheme"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "agent": {
+      "aegis_v21": {
+        "tp": 6,
+        "fn": 0,
+        "fp": 0,
+        "tn": 6,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 0,
+        "fn": 6,
+        "fp": 0,
+        "tn": 6,
+        "detection_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 1.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "latency_ms": {
+        "p50": 0.299,
+        "p95": 0.553,
+        "p99": 0.59
+      },
+      "cases": 12,
+      "missed_by_baseline_caught_by_surface": [
+        "role-hijack",
+        "capability-escalation",
+        "worm",
+        "unauthorised-directive",
+        "charter-bypass",
+        "identity-swap"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    },
+    "multimodal": {
+      "aegis_v21": {
+        "tp": 4,
+        "fn": 0,
+        "fp": 0,
+        "tn": 4,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20_flattened": {
+        "tp": 0,
+        "fn": 4,
+        "fp": 0,
+        "tn": 4,
+        "detection_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 1.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "latency_ms": {
+        "p50": 0.298,
+        "p95": 0.566,
+        "p99": 0.566
+      },
+      "cases": 8,
+      "missed_by_baseline_caught_by_surface": [
+        "png-text-chunk",
+        "png-polyglot",
+        "jpeg-comment",
+        "svg-hidden-text"
+      ],
+      "missed_by_both": [],
+      "false_positives": []
+    }
+  },
+  "corpus": {
+    "browser": {
+      "attack": 10,
+      "benign": 10
+    },
+    "documents": {
+      "attack": 10,
+      "benign": 10
+    },
+    "rag": {
+      "attack": 8,
+      "benign": 8
+    },
+    "memory": {
+      "attack": 8,
+      "benign": 8
+    },
+    "tools": {
+      "attack": 12,
+      "benign": 8
+    },
+    "agent": {
+      "attack": 6,
+      "benign": 6
+    },
+    "multimodal": {
+      "attack": 4,
+      "benign": 4
+    }
+  },
+  "overall": {
+    "aegis_v21": {
+      "tp": 58,
+      "fn": 0,
+      "fp": 0,
+      "tn": 54,
+      "detection_rate": 1.0,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "baseline_v20_flattened": {
+      "tp": 12,
+      "fn": 46,
+      "fp": 2,
+      "tn": 52,
+      "detection_rate": 0.2069,
+      "false_positive_rate": 0.037,
+      "false_negative_rate": 0.7931,
+      "precision": 0.8571,
+      "recall": 0.2069,
+      "f1": 0.3333
+    },
+    "latency_ms": {
+      "p50": 0.302,
+      "p95": 0.624,
+      "p99": 6.146
+    },
+    "cases": 112
+  }
+}

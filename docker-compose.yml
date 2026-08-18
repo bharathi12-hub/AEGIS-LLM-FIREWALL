@@ -1,0 +1,67 @@
+# AEGIS v2 — one command up:  docker compose up --build
+# Runs fully offline (no keys/internet): mock upstream + heuristic detectors +
+# in-memory stores. Redis provides cache/session state; Postgres is provided for
+# the optional SQL-backed store (the default store is in-memory).
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aegis-dev-pw}
+      POSTGRES_DB: aegis
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  gateway:
+    build:
+      context: ./gateway
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      AEGIS_OFFLINE: "1"
+      AEGIS_DEFAULT_FAIL_MODE: "closed"
+      AEGIS_REDIS_URL: "redis://redis:6379/0"
+      AEGIS_ADMIN_API_KEY: ${AEGIS_ADMIN_API_KEY:-change-me-admin-key}
+      AEGIS_CORS_ORIGINS: "http://localhost:5173"
+      AEGIS_RESPONSE_FLOOR_MS: "8"
+      AEGIS_RESPONSE_JITTER_MS: "4"
+      # Optional: mount a safetensors model dir and set AEGIS_HF_MODEL_DIR to
+      # activate the real fine-tuned classifier ensemble (S3 enforced).
+    ports:
+      - "8080:8080"
+
+  dashboard:
+    build:
+      context: ./dashboard
+    depends_on:
+      - gateway
+    environment:
+      VITE_API_BASE: "http://localhost:8080"
+    ports:
+      - "5173:5173"
+
+  # One-shot benchmark + red-team run:  docker compose run --rm benchmark
+  benchmark:
+    build:
+      context: .
+      dockerfile: benchmark/Dockerfile
+    profiles: ["bench"]
+    volumes:
+      - ./benchmark/out:/work/benchmark/out

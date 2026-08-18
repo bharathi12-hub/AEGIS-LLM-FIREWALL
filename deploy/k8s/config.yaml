@@ -1,0 +1,39 @@
+# Non-secret config. Secrets (admin key, DB URL, OIDC secret, audit key) come
+# from a Secret — here we reference an ExternalSecret/SealedSecret in real infra.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aegis-config
+  namespace: aegis
+data:
+  AEGIS_OFFLINE: "0"
+  AEGIS_DEFAULT_FAIL_MODE: "closed"
+  AEGIS_CORS_ORIGINS: "https://aegis.example.com"
+  AEGIS_MAX_PROMPT_CHARS: "32000"
+  AEGIS_JUDGE_BUDGET_PER_MIN: "30"
+  AEGIS_RATE_LIMIT_PER_MIN: "120"
+  AEGIS_RESPONSE_FLOOR_MS: "8"
+  AEGIS_RESPONSE_JITTER_MS: "4"
+  AEGIS_REDACT_PII: "1"
+  AEGIS_LOG_RETENTION_DAYS: "30"
+  AEGIS_REDIS_URL: "redis://aegis-redis:6379/0"
+  AEGIS_WORKERS: "2"
+  AEGIS_BOOTSTRAP: "0"
+  AEGIS_OIDC_ISSUER: "https://idp.example.com/"
+  AEGIS_OIDC_AUDIENCE: "aegis"
+  AEGIS_OIDC_JWKS_URL: "https://idp.example.com/.well-known/jwks.json"
+  AEGIS_MODEL_MANIFEST: "/models/manifest.json"
+---
+# Placeholder Secret. In production, replace with ExternalSecrets (Vault/ASM/GSM)
+# or a SealedSecret — never commit real values (S10).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aegis-secrets
+  namespace: aegis
+type: Opaque
+stringData:
+  AEGIS_ADMIN_API_KEY: "REPLACE_WITH_SECRET_MANAGER"
+  AEGIS_DATABASE_URL: "postgresql+psycopg://aegis:REPLACE@aegis-postgres:5432/aegis"
+  AEGIS_AUDIT_KEY: "REPLACE_WITH_32_BYTE_RANDOM"
+  AEGIS_KEY_PEPPER: "REPLACE_WITH_32_BYTE_RANDOM"

@@ -1,0 +1,137 @@
+{
+  "families": {
+    "conversation": {
+      "hardened_v21": {
+        "tp": 9,
+        "fn": 0,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20": {
+        "tp": 0,
+        "fn": 9,
+        "fp": 0,
+        "tn": 8,
+        "detection_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "latency_ms": {
+        "p50": 0.704,
+        "p95": 1.794,
+        "p99": 7.387
+      },
+      "cases": 17,
+      "fixed_by_hardening": [
+        "poisoned-tool-result",
+        "poisoned-assistant-turn",
+        "poisoned-system-turn",
+        "poisoned-tool-definition",
+        "poisoned-parameter-description",
+        "poisoned-earlier-user-turn",
+        "tool-result-delayed-trigger",
+        "tool-result-exfil-markdown",
+        "assistant-turn-standing-privilege"
+      ],
+      "still_missed": [],
+      "false_positives": []
+    },
+    "structural": {
+      "hardened_v21": {
+        "tp": 16,
+        "fn": 0,
+        "fp": 0,
+        "tn": 11,
+        "detection_rate": 1.0,
+        "false_positive_rate": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "baseline_v20": {
+        "tp": 0,
+        "fn": 16,
+        "fp": 0,
+        "tn": 11,
+        "detection_rate": 0.0,
+        "false_positive_rate": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "latency_ms": {
+        "p50": 0.32,
+        "p95": 1.32,
+        "p99": 1.613
+      },
+      "cases": 27,
+      "fixed_by_hardening": [
+        "ssti-jinja-sandbox",
+        "ssti-java-el",
+        "ssti-erb-ruby",
+        "ssti-freemarker",
+        "log4shell",
+        "log4shell-obfuscated",
+        "yaml-python-object",
+        "yaml-ruby-object",
+        "java-serialized",
+        "php-object-injection",
+        "xxe-entity",
+        "nosql-where",
+        "prototype-pollution",
+        "many-shot-jailbreak",
+        "stacked-persuasion",
+        "reward-hacking"
+      ],
+      "still_missed": [],
+      "false_positives": []
+    }
+  },
+  "corpus": {
+    "conversation": {
+      "attack": 9,
+      "benign": 8
+    },
+    "structural": {
+      "attack": 16,
+      "benign": 11
+    }
+  },
+  "overall": {
+    "hardened_v21": {
+      "tp": 25,
+      "fn": 0,
+      "fp": 0,
+      "tn": 19,
+      "detection_rate": 1.0,
+      "false_positive_rate": 0.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "baseline_v20": {
+      "tp": 0,
+      "fn": 25,
+      "fp": 0,
+      "tn": 19,
+      "detection_rate": 0.0,
+      "false_positive_rate": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "latency_ms": {
+      "p50": 0.39,
+      "p95": 1.742,
+      "p99": 7.387
+    },
+    "cases": 44
+  }
+}

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aegis-models
+  namespace: aegis
+spec:
+  accessModes: [ReadOnlyMany]
+  resources:
+    requests: { storage: 5Gi }
+---
+# Prometheus Operator scrape config.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: aegis-gateway
+  namespace: aegis
+  labels: { release: prometheus }
+spec:
+  selector:
+    matchLabels: { app.kubernetes.io/name: aegis }
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+# SLO / security alerting.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: aegis-gateway
+  namespace: aegis
+  labels: { release: prometheus }
+spec:
+  groups:
+    - name: aegis.slo
+      rules:
+        - alert: AegisHighLatencyP99
+          expr: histogram_quantile(0.99, sum(rate(aegis_latency_ms_bucket[5m])) by (le)) > 250
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: "AEGIS p99 inspection latency > 250ms" }
+        - alert: AegisBlockRateSpike
+          expr: sum(rate(aegis_blocks_total[5m])) > 5 * sum(rate(aegis_blocks_total[1h] offset 1h))
+          for: 5m
+          labels: { severity: warning }
+          annotations: { summary: "Block rate spiked 5x — possible attack campaign" }
+        - alert: AegisPodDown
+          expr: kube_deployment_status_replicas_available{deployment="aegis-gateway"} < 2
+          for: 5m
+          labels: { severity: critical }
+          annotations: { summary: "Fewer than 2 AEGIS gateway replicas available" }

@@ -1,0 +1,27 @@
+{
+  "_comment": "Pinned model registry (S3). Copy to models/manifest.json and run scripts/fetch_models.py to populate + fill checksums. Revisions MUST be full commit hashes, never 'main'.",
+  "models": [
+    {
+      "name": "protectai-deberta-injection-v2",
+      "repo": "protectai/deberta-v3-base-prompt-injection-v2",
+      "revision": "0000000000000000000000000000000000000000",
+      "path": "protectai-deberta-injection-v2",
+      "role": "classifier",
+      "files": {
+        "model.safetensors": "<sha256-filled-by-fetch_models.py>",
+        "config.json": "<sha256>"
+      }
+    },
+    {
+      "name": "llama-prompt-guard-2-86m",
+      "repo": "meta-llama/Llama-Prompt-Guard-2-86M",
+      "revision": "0000000000000000000000000000000000000000",
+      "path": "llama-prompt-guard-2-86m",
+      "role": "classifier",
+      "files": {
+        "model.safetensors": "<sha256>",
+        "config.json": "<sha256>"
+      }
+    }
+  ]
+}

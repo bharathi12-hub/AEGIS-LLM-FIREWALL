@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegis-gateway"
+version = "2.0.0"
+description = "AEGIS v2 — Hardened Enterprise Adversarial Prompt Firewall (gateway)"
+requires-python = ">=3.11"
+
+# CORE dependencies (light). The gateway + detection engine run fully offline on
+# these alone (heuristic detector profile). Pinned for reproducibility (R5).
+dependencies = [
+  "fastapi==0.111.0",
+  "uvicorn[standard]==0.30.1",
+  "gunicorn==22.0.0",
+  "httpx==0.27.0",
+  "pydantic==2.7.4",
+  "PyYAML==6.0.1",
+  "SQLAlchemy==2.0.31",
+  "alembic==1.13.2",
+  "asyncpg==0.29.0",
+  "redis==5.0.7",
+  "prometheus-client==0.20.0",
+  "argon2-cffi==23.1.0",
+  "safetensors==0.4.3",
+  "python-multipart==0.0.9",
+]
+
+[project.optional-dependencies]
+# Heavy, OPTIONAL real-model layers. Enable to run the fine-tuned classifier
+# ensemble / real judge / FAISS embeddings / Presidio PII instead of heuristics.
+# safetensors-only loading is enforced at load time (S3).
+ml = [
+  "transformers==4.42.3",
+  "torch==2.3.1",
+  "sentence-transformers==3.0.1",
+  "faiss-cpu==1.8.0",
+  "presidio-analyzer==2.2.354",
+]
+bench = [
+  "datasets==2.20.0",
+  "scikit-learn==1.5.0",
+  "matplotlib==3.9.0",
+  "pandas==2.2.2",
+]
+dev = [
+  "pytest==8.2.2",
+  "pytest-asyncio==0.23.7",
+]
+
+[tool.setuptools]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

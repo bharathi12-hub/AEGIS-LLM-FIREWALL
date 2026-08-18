@@ -1,0 +1,30 @@
+# TLS-terminating ingress with security headers + request-size cap (S10/S14).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aegis-gateway
+  namespace: aegis
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "256k"
+    nginx.ingress.kubernetes.io/limit-rps: "50"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Strict-Transport-Security: max-age=63072000; includeSubDomains; preload";
+      more_set_headers "X-Content-Type-Options: nosniff";
+      more_set_headers "X-Frame-Options: DENY";
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [aegis.example.com]
+      secretName: aegis-tls
+  rules:
+    - host: aegis.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: aegis-gateway
+                port: { number: 80 }

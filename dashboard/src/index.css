@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   AEGIS SOC — enterprise theme design system (dark + light)
+   Surface + text + border colors are theme-driven via CSS vars.
+   ============================================================ */
+
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-bg: 7 11 22;
+  --c-panel: 15 22 38;
+  --c-panel-2: 20 29 49;
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --tile: rgba(255, 255, 255, 0.03);
+  --input-bg: rgba(0, 0, 0, 0.3);
+  --grid: rgba(255, 255, 255, 0.025);
+  --glow-a: rgba(79, 140, 255, 0.1);
+  --glow-b: rgba(34, 211, 238, 0.06);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --c-bg: 238 242 248;
+  --c-panel: 255 255 255;
+  --c-panel-2: 248 250 252;
+  --line: rgba(15, 23, 42, 0.1);
+  --line-strong: rgba(15, 23, 42, 0.16);
+  --tile: rgba(15, 23, 42, 0.035);
+  --input-bg: rgba(15, 23, 42, 0.03);
+  --grid: rgba(15, 23, 42, 0.04);
+  --glow-a: rgba(79, 140, 255, 0.12);
+  --glow-b: rgba(34, 211, 238, 0.1);
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply text-slate-200 antialiased font-sans;
+    background-color: rgb(var(--c-bg));
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+      radial-gradient(900px 500px at 82% -8%, var(--glow-a), transparent 60%),
+      radial-gradient(700px 500px at 0% 100%, var(--glow-b), transparent 55%);
+    background-size: 32px 32px, 32px 32px, 100% 100%, 100% 100%;
+    background-attachment: fixed;
+  }
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: 999px;
+  }
+  ::selection {
+    background: rgba(79, 140, 255, 0.35);
+  }
+}
+
+@layer components {
+  /* Surfaces --------------------------------------------------- */
+  .card {
+    @apply bg-aegis-panel/80 backdrop-blur-sm rounded-xl shadow-card;
+    border: 1px solid var(--line);
+  }
+  .card-p {
+    @apply card p-4;
+  }
+  .glass {
+    background: var(--tile);
+    border: 1px solid var(--line);
+    @apply backdrop-blur-md;
+  }
+
+  /* Buttons ---------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 bg-aegis-accent text-white px-4 py-2
+      rounded-lg text-sm font-semibold transition-all duration-150
+      hover:brightness-110 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
+      text-slate-300 transition-all duration-150 hover:text-white active:scale-[0.98]
+      disabled:opacity-40 disabled:pointer-events-none;
+    border: 1px solid var(--line);
+    background: var(--tile);
+  }
+  .btn-ghost:hover {
+    background: var(--line);
+  }
+  .btn-danger {
+    @apply btn bg-sev-critical hover:brightness-110;
+  }
+
+  /* Tabs / nav ------------------------------------------------- */
+  .navlink {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer
+      text-slate-400 transition-all duration-150 hover:text-slate-100;
+  }
+  .navlink:hover {
+    background: var(--tile);
+  }
+  .navlink-active {
+    @apply text-white bg-aegis-accent/15 ring-1 ring-inset ring-aegis-accent/40;
+  }
+
+  /* Badges / pills --------------------------------------------- */
+  .pill {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold
+      leading-none tracking-wide;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-300;
+    background: var(--tile);
+    border: 1px solid var(--line);
+  }
+
+  /* Inputs ----------------------------------------------------- */
+  textarea,
+  input,
+  select {
+    @apply rounded-lg px-3 py-2 w-full text-slate-100 text-sm outline-none
+      transition-colors duration-150 focus:border-aegis-accent/70 focus:ring-2
+      focus:ring-aegis-accent/20 placeholder:text-slate-600;
+    background: var(--input-bg);
+    border: 1px solid var(--line);
+  }
+
+  /* Data tables ------------------------------------------------ */
+  .th {
+    @apply text-left text-[11px] uppercase tracking-wider text-slate-500 font-semibold py-2 px-3;
+  }
+  .td {
+    @apply py-2 px-3 text-sm align-middle;
+    border-top: 1px solid var(--line);
+  }
+  .kpi-label {
+    @apply text-[11px] uppercase tracking-wider text-slate-500 font-semibold;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-aegis-accent to-aegis-cyan;
+  }
+  .skeleton {
+    @apply relative overflow-hidden rounded-md;
+    background: var(--tile);
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.12), transparent);
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   Light-theme overrides for the dark-first Tailwind utilities
+   and component classes. !important so they win over both the
+   utilities layer and the @apply'd component layer regardless of
+   source order. Accent/severity colors (set inline or via fixed
+   tokens) are untouched and read well on light.
+   ============================================================ */
+:root[data-theme="light"] .text-slate-50,
+:root[data-theme="light"] .text-slate-100 { color: #0f172a !important; }
+:root[data-theme="light"] .text-slate-200 { color: #1e293b !important; }
+:root[data-theme="light"] .text-slate-300 { color: #334155 !important; }
+:root[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+:root[data-theme="light"] .text-slate-500 { color: #576375 !important; }
+:root[data-theme="light"] .text-slate-600 { color: #6b7688 !important; }
+
+/* Component classes that bake slate colors in via @apply */
+:root[data-theme="light"] .navlink { color: #475569; }
+:root[data-theme="light"] .btn-ghost { color: #334155; }
+:root[data-theme="light"] .th,
+:root[data-theme="light"] .kpi-label { color: #576375; }
+:root[data-theme="light"] .chip { color: #334155; }
+:root[data-theme="light"] .navlink-active { color: #1d4ed8 !important; background: rgba(79, 140, 255, 0.14); }
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] input,
+:root[data-theme="light"] select { color: #0f172a; }
+:root[data-theme="light"] code { color: #334155; }
+
+/* Surfaces / borders */
+:root[data-theme="light"] .bg-white\/\[0\.02\],
+:root[data-theme="light"] .bg-white\/\[0\.03\],
+:root[data-theme="light"] .bg-white\/\[0\.04\],
+:root[data-theme="light"] .bg-white\/\[0\.05\],
+:root[data-theme="light"] .bg-white\/\[0\.06\] { background-color: rgba(15, 23, 42, 0.04) !important; }
+:root[data-theme="light"] .hover\:bg-white\/\[0\.04\]:hover,
+:root[data-theme="light"] .hover\:bg-white\/\[0\.06\]:hover,
+:root[data-theme="light"] .hover\:bg-white\/\[0\.08\]:hover,
+:root[data-theme="light"] .hover\:bg-white\/20:hover { background-color: rgba(15, 23, 42, 0.07) !important; }
+:root[data-theme="light"] .border-white\/\[0\.05\],
+:root[data-theme="light"] .border-white\/\[0\.06\],
+:root[data-theme="light"] .border-white\/\[0\.07\],
+:root[data-theme="light"] .border-white\/10 { border-color: rgba(15, 23, 42, 0.1) !important; }
+:root[data-theme="light"] .divide-white\/\[0\.04\] > :not([hidden]) ~ :not([hidden]),
+:root[data-theme="light"] .divide-white\/\[0\.05\] > :not([hidden]) ~ :not([hidden]) { border-color: rgba(15, 23, 42, 0.08) !important; }
+:root[data-theme="light"] .bg-black\/20,
+:root[data-theme="light"] .bg-black\/30 { background-color: rgba(15, 23, 42, 0.03) !important; }
+
+/* Accessibility: honor the OS "reduce motion" preference (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Visible keyboard focus for accessibility. */
+:where(button, a, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid #4f8cff;
+  outline-offset: 2px;
+  border-radius: 8px;
+}

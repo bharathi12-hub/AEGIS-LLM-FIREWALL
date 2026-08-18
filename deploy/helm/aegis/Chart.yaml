@@ -1,0 +1,9 @@
+apiVersion: v2
+name: aegis
+description: AEGIS v2 — Hardened Enterprise Adversarial Prompt Firewall
+type: application
+version: 2.0.0
+appVersion: "2.0.0"
+maintainers:
+  - name: AEGIS
+kubeVersion: ">=1.25.0"

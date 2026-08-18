@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aegis
+  labels:
+    app.kubernetes.io/name: aegis
+    # Enforce the restricted Pod Security Standard for the whole namespace.
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted

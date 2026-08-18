@@ -1,0 +1,13 @@
+# Default policy applied to every tenant unless overridden.
+# Secure by default (R8): fail-closed, judge on, conservative thresholds.
+fail_mode: closed
+block_threshold: 0.75
+review_threshold: 0.45
+judge_enabled: true
+judge_budget_per_min: 30
+rate_limit_per_min: 120
+retention_days: 30
+languages:
+  - auto
+allow_list: []
+deny_list: []
