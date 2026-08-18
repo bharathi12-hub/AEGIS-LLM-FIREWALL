@@ -36,6 +36,43 @@ words like "ignore previous instructions".
 
 ---
 
+## The console
+
+The operator console ships with the gateway (`make up`, then `:5173`). It reads
+the live gateway when one is reachable and falls back to a labelled demo
+dataset otherwise — the badges in the top right always say which you are
+looking at.
+
+**Executive Dashboard** — posture score, live KPIs, attack geography, and the
+most recent blocked events.
+
+![Executive Dashboard](docs/screenshots/executive-dashboard.png)
+
+**Detection Pipeline** — the six stages every prompt passes through, each
+reporting its own signal strength. Paste a prompt, or fire one of the preset
+attacks, and watch where it gets caught.
+
+![Detection Pipeline](docs/screenshots/detection-pipeline.png)
+
+**Live Threat Monitor** — the real-time event stream, newest first.
+
+![Live Threat Monitor](docs/screenshots/live-threat-monitor.png)
+
+**Prompt Investigation** — per-prompt forensics: normalization diff, which
+layer fired, and the OWASP LLM / MITRE ATLAS mapping for the finding.
+
+![Prompt Investigation](docs/screenshots/prompt-investigation.png)
+
+**Benchmark** — the `make bench` numbers, in the UI.
+
+![Benchmark](docs/screenshots/benchmark.png)
+
+**Threat Intelligence** — attack families, transforms seen, and coverage.
+
+![Threat Intelligence](docs/screenshots/threat-intelligence.png)
+
+---
+
 ## Why v2 exists
 
 Every existing guardrail has a gap (see the spec in `docs/`): classifiers are
