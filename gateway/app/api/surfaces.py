@@ -41,7 +41,6 @@ from app.api.schemas import (
 )
 from app.api.proxy import _principal
 from app.observability import audit, events, forensics, metrics
-from app.policy.engine import get_engine
 from app.security.ratelimit import get_rate_limiter
 from app.surfaces import agent as agent_surface
 from app.surfaces import browser as browser_surface

@@ -64,7 +64,6 @@ class EventBus:
                 self._seq += 1
                 event.seq = self._seq
                 self._ring.append(event)
-                dead: list[deque[InspectionEvent]] = []
                 for q in self._subscribers:
                     if len(q) >= _SUBSCRIBER_QUEUE:
                         # A subscriber that cannot keep up drops the OLDEST event

@@ -12,6 +12,18 @@ jobs:
         with:
           python-version: "3.11"
 
+      # Lint. ruff is pinned so the gate turns red on a code change, never on a
+      # routine tool upgrade shipping new rules. Rule set lives in ruff.toml.
+      - name: Lint (ruff)
+        run: |
+          pip install ruff==0.16.3
+          ruff check gateway/app gateway/tests gateway/migrations \
+                     benchmark redteam loadtest scripts
+
+      # Syntax floor, independent of any third-party tool.
+      - name: Compile check (stdlib)
+        run: python -m compileall -q gateway/app benchmark redteam loadtest scripts
+
       # The detection engine + benchmark are pure stdlib — no install needed to test.
       - name: Unit tests (stdlib profile)
         run: |

@@ -43,7 +43,7 @@ scans HTML you have already fetched.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from html.parser import HTMLParser
 
 from app.config import settings

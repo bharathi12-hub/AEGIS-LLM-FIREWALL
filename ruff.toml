@@ -1,0 +1,28 @@
+# Lint configuration for the AEGIS repo.
+#
+# The rule set is pinned EXPLICITLY rather than left to ruff's defaults. Two
+# reasons, both learned the hard way on this codebase:
+#
+#  1. Reproducibility. A bare `ruff check` resolves a different rule set across
+#     ruff versions, so an unpinned gate turns red on a routine tool upgrade
+#     rather than on a code change. CI pins the ruff version to match.
+#
+#  2. This codebase deliberately contains what a linter reads as attacks.
+#     app/pipeline/normalize.py holds the zero-width and bidi-override
+#     characters it exists to strip, and redteam/transforms.py generates them.
+#     Broad rule sets flag those literals (PLE2502, PLE2515) as obfuscated code;
+#     "fixing" them would break the detection engine and the red-team corpus.
+#
+# E4/E7/E9 (pycodestyle errors) + F (pyflakes) is ruff's documented default and
+# catches real defects — dead imports, unused locals, undefined names — without
+# the stylistic noise. Widen deliberately, not by accident.
+
+target-version = "py311"
+line-length = 100
+
+[lint]
+select = ["E4", "E7", "E9", "F"]
+
+[lint.per-file-ignores]
+# Alembic's generated scaffolding keeps unused imports by convention.
+"gateway/migrations/versions/*.py" = ["F401"]

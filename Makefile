@@ -18,7 +18,8 @@ test:
 lint:
 	python -m compileall -q gateway/app benchmark redteam loadtest scripts
 	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check gateway/app benchmark redteam loadtest scripts; \
+		ruff check gateway/app gateway/tests gateway/migrations \
+		           benchmark redteam loadtest scripts; \
 	else \
 		echo "NOTE: ruff not installed — ran compileall only (pip install ruff)"; \
 	fi

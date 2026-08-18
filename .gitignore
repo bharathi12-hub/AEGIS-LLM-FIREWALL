@@ -6,6 +6,9 @@ venv/
 *.egg-info/
 .pytest_cache/
 
+# Lint / tooling caches
+.ruff_cache/
+
 # Node / dashboard
 node_modules/
 dist/
