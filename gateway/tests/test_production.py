@@ -16,7 +16,8 @@ from app.storage.models import Tenant
 
 
 def _sha(path):
-    return hashlib.sha256(open(path, "rb").read()).hexdigest()
+    with open(path, "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
 
 
 class TestModelRegistry(unittest.TestCase):
@@ -24,14 +25,16 @@ class TestModelRegistry(unittest.TestCase):
         mdir = os.path.join(tmp, "m1")
         os.makedirs(mdir, exist_ok=True)
         wpath = os.path.join(mdir, "model.safetensors")
-        open(wpath, "wb").write(weights)
+        with open(wpath, "wb") as fh:
+            fh.write(weights)
         if with_pickle:
             open(os.path.join(mdir, "pytorch_model.bin"), "wb").close()
         manifest = {"models": [{"name": "m1", "repo": "r", "revision": "abc123",
                                 "path": "m1", "role": "classifier",
                                 "files": {"model.safetensors": _sha(wpath)}}]}
         mpath = os.path.join(tmp, "manifest.json")
-        json.dump(manifest, open(mpath, "w"))
+        with open(mpath, "w", encoding="utf-8") as fh:
+            json.dump(manifest, fh)
         return mpath
 
     def test_valid_registry_passes(self):
@@ -45,7 +48,8 @@ class TestModelRegistry(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             mpath = self._make(tmp)
             # Tamper with the weight file after the manifest was pinned.
-            open(os.path.join(tmp, "m1", "model.safetensors"), "wb").write(b"EVIL")
+            with open(os.path.join(tmp, "m1", "model.safetensors"), "wb") as fh:
+                fh.write(b"EVIL")
             self.assertFalse(verify_registry(mpath).ok)
             with self.assertRaises(UnsafeModelError):
                 assert_registry_ok(mpath)

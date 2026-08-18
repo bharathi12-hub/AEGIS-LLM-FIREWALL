@@ -54,7 +54,7 @@ prompt, so the build covers the channels around it — the part most products mi
 Production stack (needs Docker):
 
 ```bash
-make up          # gateway :8000 + redis + postgres + dashboard :5173
+make up          # gateway :8080 + redis + postgres + dashboard :5173
 ```
 
 Zero-dependency demo (no Docker, no pip installs — stdlib only):

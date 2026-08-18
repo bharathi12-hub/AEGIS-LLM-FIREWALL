@@ -38,6 +38,10 @@ services:
       AEGIS_OFFLINE: "1"
       AEGIS_DEFAULT_FAIL_MODE: "closed"
       AEGIS_REDIS_URL: "redis://redis:6379/0"
+      # Deliberately a value listed in app/security/preflight.py:_WEAK_SECRETS.
+      # This is a demo default that MUST fail production preflight, so do not
+      # "harden" it into a longer placeholder — a random-looking string would
+      # pass the blacklist and the >= 24 char check and ship to prod unnoticed.
       AEGIS_ADMIN_API_KEY: ${AEGIS_ADMIN_API_KEY:-change-me-admin-key}
       AEGIS_CORS_ORIGINS: "http://localhost:5173"
       AEGIS_RESPONSE_FLOOR_MS: "8"
