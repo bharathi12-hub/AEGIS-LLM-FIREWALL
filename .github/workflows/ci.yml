@@ -24,8 +24,14 @@ jobs:
       - name: Compile check (stdlib)
         run: python -m compileall -q gateway/app benchmark redteam loadtest scripts
 
-      # The detection engine + benchmark are pure stdlib — no install needed to test.
-      - name: Unit tests (stdlib profile)
+      # The detection engine itself is pure stdlib, but the API tests
+      # (test_api, test_realtime, test_preflight, test_surfaces_api) import
+      # fastapi/pydantic at module scope. Without the install, unittest errored
+      # on those modules and silently ran 211 of 287 tests.
+      - name: Install gateway (core deps)
+        run: pip install ./gateway
+
+      - name: Unit tests
         run: |
           cd gateway
           python -m unittest discover -s tests -p "test_*.py"
