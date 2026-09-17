@@ -32,8 +32,8 @@ dependencies = [
 # ensemble / real judge / FAISS embeddings / Presidio PII instead of heuristics.
 # safetensors-only loading is enforced at load time (S3).
 ml = [
-  "transformers==4.42.3",
-  "torch==2.3.1",
+  "transformers==5.10.1",
+  "torch==2.13.0",
   "sentence-transformers==3.0.1",
   "faiss-cpu==1.8.0",
   "presidio-analyzer==2.2.354",
@@ -45,7 +45,7 @@ bench = [
   "pandas==2.2.2",
 ]
 dev = [
-  "pytest==8.2.2",
+  "pytest==9.0.3",
   "pytest-asyncio==0.23.7",
 ]
 
