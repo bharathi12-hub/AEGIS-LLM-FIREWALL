@@ -33,7 +33,7 @@ dependencies = [
 # safetensors-only loading is enforced at load time (S3).
 ml = [
   "transformers==4.42.3",
-  "torch==2.3.1",
+  "torch==2.13.0",
   "sentence-transformers==3.0.1",
   "faiss-cpu==1.8.0",
   "presidio-analyzer==2.2.354",
