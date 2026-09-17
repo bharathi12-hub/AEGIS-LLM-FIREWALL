@@ -4,17 +4,27 @@ import { inspectLocal } from "./engine";
 
 const BASE = (import.meta as any).env?.VITE_API_BASE ?? "http://localhost:8000";
 
-// Keys are entered in the UI (never hard-coded). Stored only in memory + session.
+// Keys are entered in the UI (never hard-coded). The API key and admin key
+// are credentials, so they live ONLY in a module-level in-memory variable —
+// never in sessionStorage/localStorage, which any script or tool with Web
+// Storage read access (a browser extension, devtools, a memory/disk
+// inspection) could read back in clear text (CWE-312). This does mean a page
+// reload clears them and the user re-enters them, which is an intentional
+// trade-off: the tenant id isn't a secret, so it keeps its sessionStorage
+// convenience across reloads.
+let _apiKey = "";
+let _adminKey = "";
+
 export function getKeys() {
   return {
-    apiKey: sessionStorage.getItem("aegis_key") ?? "",
-    adminKey: sessionStorage.getItem("aegis_admin") ?? "",
+    apiKey: _apiKey,
+    adminKey: _adminKey,
     tenant: sessionStorage.getItem("aegis_tenant") ?? "acme-highsec",
   };
 }
 export function setKeys(apiKey: string, adminKey: string, tenant: string) {
-  sessionStorage.setItem("aegis_key", apiKey);
-  sessionStorage.setItem("aegis_admin", adminKey);
+  _apiKey = apiKey;
+  _adminKey = adminKey;
   sessionStorage.setItem("aegis_tenant", tenant);
 }
 

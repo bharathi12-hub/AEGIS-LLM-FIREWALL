@@ -86,12 +86,14 @@ _ENTITY_RE = re.compile(rb"<!ENTITY", re.IGNORECASE)
 def safe_xml_parse(data: bytes):
     """Parse XML with XXE / entity-expansion classes refused up front.
 
-    ``xml.etree.ElementTree`` does not resolve external entities, but it DOES
-    expand internal ones, which is all "billion laughs" needs. Rejecting any
-    document that declares a DTD or an entity costs us nothing (no legitimate
-    OOXML part or config file declares one) and removes the whole class.
+    Parsing goes through ``defusedxml`` rather than the bare stdlib parser:
+    it refuses DTDs, external entities and internal entity expansion
+    ("billion laughs") unconditionally, at the C-extension level, instead of
+    relying solely on a byte-offset-limited regex scan (a ``<!DOCTYPE`` placed
+    past the scan window could previously slip through that check).
     """
-    import xml.etree.ElementTree as ET
+    from defusedxml import ElementTree as ET
+    from defusedxml.common import DefusedXmlException
 
     if len(data) > _MAX_XML_BYTES:
         raise DocumentParseError(f"xml too large: {len(data)} bytes")
@@ -100,6 +102,10 @@ def safe_xml_parse(data: bytes):
         raise DocumentParseError("xml declares a DTD/ENTITY — refused (XXE/billion-laughs)")
     try:
         return ET.fromstring(data)
+    except DefusedXmlException as exc:
+        raise DocumentParseError(
+            f"xml declares a DTD/ENTITY — refused (XXE/billion-laughs): {exc}"
+        ) from exc
     except ET.ParseError as exc:
         raise DocumentParseError(f"malformed xml: {exc}") from exc
 
@@ -280,7 +286,9 @@ def _merge_runs(segments: list[Segment]) -> list[Segment]:
 # PDF
 # ---------------------------------------------------------------------------
 
-_PDF_STREAM_RE = re.compile(rb"stream\r?\n(.*?)\r?\nendstream", re.DOTALL)
+# Bounded to _MAX_ENTRY_BYTES: caps worst-case backtracking on adversarial
+# input instead of leaving the inner group unbounded (CodeQL: polynomial regex).
+_PDF_STREAM_RE = re.compile(rb"stream\r?\n(.{0,8000000}?)\r?\nendstream", re.DOTALL)
 _PDF_INFO_KEYS = ("Title", "Author", "Subject", "Keywords", "Producer", "Creator")
 # Active-content keys: these make a PDF executable rather than merely readable.
 _PDF_ACTIVE = {
@@ -293,9 +301,11 @@ _PDF_ACTIVE = {
     b"/SubmitForm": ("pdf-submit-form", 0.60),
 }
 
-_TJ_RE = re.compile(rb"\((?:\\.|[^\\()])*\)\s*Tj")
-_TJ_ARRAY_RE = re.compile(rb"\[(.*?)\]\s*TJ", re.DOTALL)
-_PDF_STRING_RE = re.compile(rb"\((?:\\.|[^\\()])*\)")
+# Bounded (64KB is generous for a single PDF text-show operand) so the
+# alternation can't be replayed across an unbounded span (CodeQL: polynomial regex).
+_TJ_RE = re.compile(rb"\((?:\\.|[^\\()]){0,65536}\)\s*Tj")
+_TJ_ARRAY_RE = re.compile(rb"\[(.{0,65536}?)\]\s*TJ", re.DOTALL)
+_PDF_STRING_RE = re.compile(rb"\((?:\\.|[^\\()]){0,65536}\)")
 
 
 def _pdf_unescape(raw: bytes) -> str:
@@ -388,8 +398,10 @@ def _pdf_segments(data: bytes) -> tuple[list[Segment], list[tuple[str, float]], 
 # Text-ish formats
 # ---------------------------------------------------------------------------
 
-_MD_COMMENT_RE = re.compile(r"<!--(.*?)-->", re.DOTALL)
-_MD_FENCE_RE = re.compile(r"```[\w-]*\n(.*?)```", re.DOTALL)
+# Bounded to 1MB per comment/fence body (CodeQL: polynomial regex) — plenty
+# for any legitimate document while capping adversarial worst-case work.
+_MD_COMMENT_RE = re.compile(r"<!--(.{0,1000000}?)-->", re.DOTALL)
+_MD_FENCE_RE = re.compile(r"```[\w-]*\n(.{0,1000000}?)```", re.DOTALL)
 _MD_LINK_RE = re.compile(r"!?\[([^\]]{0,120})\]\(([^)\s]{0,400})\)")
 _MD_REF_RE = re.compile(r"(?m)^\s{0,3}\[([^\]]{1,60})\]:\s*(\S{1,400})")
 
@@ -482,7 +494,7 @@ def _xml_segments(data: bytes) -> list[Segment]:
                 segments.append(Segment(text=value.strip(), channel=Channel.ATTRIBUTE,
                                         location=f"xml:{path}@{_localname(key)}"))
     # ElementTree drops comments; recover them directly so the channel survives.
-    for i, m in enumerate(re.finditer(rb"<!--(.*?)-->", data, re.DOTALL)):
+    for i, m in enumerate(re.finditer(rb"<!--(.{0,1000000}?)-->", data, re.DOTALL)):
         segments.append(Segment(text=m.group(1).decode("utf-8", "replace"),
                                 channel=Channel.COMMENT, location=f"xml:comment[{i}]"))
     return segments

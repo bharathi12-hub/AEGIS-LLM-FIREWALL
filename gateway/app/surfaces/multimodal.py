@@ -295,7 +295,9 @@ def _jpeg_segments(data: bytes) -> tuple[list[Segment], list[tuple[str, float, s
 
 def _gif_segments(data: bytes) -> list[Segment]:
     segments: list[Segment] = []
-    for i, m in enumerate(re.finditer(rb"\x21\xfe(.*?)\x00", data[:1_000_000], re.DOTALL)):
+    # Bounded (CodeQL: polynomial regex) on top of the existing 1MB input
+    # slice, capping the inner group itself rather than leaving it unbounded.
+    for i, m in enumerate(re.finditer(rb"\x21\xfe(.{0,65536}?)\x00", data[:1_000_000], re.DOTALL)):
         text = _printable_runs(m.group(1))
         if len(text.strip()) > 3:
             segments.append(Segment(text=text[:_MAX_METADATA_FIELD],

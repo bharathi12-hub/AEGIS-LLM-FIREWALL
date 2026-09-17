@@ -162,7 +162,9 @@ def _parse_declarations(css: str) -> dict[str, str]:
     return out
 
 
-_RULE_RE = re.compile(r"([^{}]+)\{([^{}]*)\}", re.DOTALL)
+# Bounded (CodeQL: polynomial regex) so an adversarial stylesheet can't force
+# unbounded backtracking through the selector/body groups.
+_RULE_RE = re.compile(r"([^{}]{1,10000})\{([^{}]{0,100000})\}", re.DOTALL)
 
 
 def _parse_stylesheet(css: str) -> dict[str, dict[str, str]]:
@@ -175,7 +177,11 @@ def _parse_stylesheet(css: str) -> dict[str, dict[str, str]]:
     """
     rules: dict[str, dict[str, str]] = {}
     # Drop at-rule preludes (@media ... { ... }) but keep their inner rules.
-    css = re.sub(r"@[a-z-]+[^{]*\{", "", css or "", flags=re.IGNORECASE)
+    # Possessive on the at-rule name (Python 3.11+) so it can't be replayed
+    # against the following prelude group — they'd otherwise both match a
+    # run of letters, giving the backtracker an ambiguous split to explore
+    # (CodeQL: polynomial regex). Also bounded as defense in depth.
+    css = re.sub(r"@[a-z-]++[^{]{0,10000}\{", "", css or "", flags=re.IGNORECASE)
     for sel_blob, body in _RULE_RE.findall(css):
         decls = _parse_declarations(body)
         if not decls:
@@ -406,7 +412,9 @@ def extract(html: str) -> tuple[list[Segment], list[tuple[str, str, float, str]]
     text = html or ""
     # Stylesheets first, so class-based hiding resolves during the walk.
     sheet: dict[str, dict[str, str]] = {}
-    for block in re.findall(r"<style[^>]*>(.*?)</style>", text,
+    # Bounded (CodeQL: polynomial regex) — no legitimate inline stylesheet
+    # runs past 1MB.
+    for block in re.findall(r"<style[^>]*>(.{0,1000000}?)</style>", text,
                             re.IGNORECASE | re.DOTALL):
         sheet.update(_parse_stylesheet(block))
 

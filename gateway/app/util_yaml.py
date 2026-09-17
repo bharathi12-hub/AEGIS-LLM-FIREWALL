@@ -43,9 +43,11 @@ def _coerce_scalar(tok: str) -> Any:
         return True
     if low == "false":
         return False
-    if re.fullmatch(r"-?\d+", tok):
+    # Bounded to 1000 digits (CodeQL: polynomial regex) — no legitimate YAML
+    # scalar needs more, and it caps worst-case backtracking on adversarial input.
+    if re.fullmatch(r"-?\d{1,1000}", tok):
         return int(tok)
-    if re.fullmatch(r"-?\d*\.\d+", tok):
+    if re.fullmatch(r"-?\d{0,1000}\.\d{1,1000}", tok):
         return float(tok)
     return tok
 
