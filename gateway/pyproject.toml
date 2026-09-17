@@ -32,7 +32,7 @@ dependencies = [
 # ensemble / real judge / FAISS embeddings / Presidio PII instead of heuristics.
 # safetensors-only loading is enforced at load time (S3).
 ml = [
-  "transformers==4.42.3",
+  "transformers==5.10.1",
   "torch==2.3.1",
   "sentence-transformers==3.0.1",
   "faiss-cpu==1.8.0",
