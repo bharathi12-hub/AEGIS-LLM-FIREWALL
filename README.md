@@ -5,6 +5,15 @@ A **defensive** security product: an OpenAI-compatible gateway that detects and
 holds up under **character-injection evasion**. It never generates attacks; all
 adversarial samples come from public labeled data and standard evasion literature.
 
+## Project team
+
+AEGIS is a team project by **Bharathithasan S**, **Ganesh M**, and
+**Monish Tushar V.S**. Bharathithasan's documented cybersecurity work includes
+[security-hardening changes](https://github.com/bharathi12-hub/AEGIS-LLM-FIREWALL/commit/15618e93b408f85fab667af07137ad2241021bc7)
+to document and browser-content parsing and console credential handling. The
+repository does not assign the other components or test execution to individual
+members; the architecture and evaluation below describe the project as a whole.
+
 > **The money shot.** Under character-injection evasion (emoji-tag smuggling,
 > bidi, homoglyph, zero-width, base64), a single production-style classifier's
 > attack-through rate is **100% ASR** — the attacks sail past. AEGIS v2 holds it
