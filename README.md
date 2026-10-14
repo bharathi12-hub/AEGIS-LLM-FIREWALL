@@ -7,12 +7,17 @@ adversarial samples come from public labeled data and standard evasion literatur
 
 ## Project team
 
-AEGIS is a team project by **Bharathithasan S**, **Ganesh M**, and
-**Monish Tushar V.S**. Bharathithasan's documented cybersecurity work includes
-[security-hardening changes](https://github.com/bharathi12-hub/AEGIS-LLM-FIREWALL/commit/15618e93b408f85fab667af07137ad2241021bc7)
-to document and browser-content parsing and console credential handling. The
-repository does not assign the other components or test execution to individual
-members; the architecture and evaluation below describe the project as a whole.
+AEGIS is a team project with these assigned focus areas:
+
+| Member | Project focus |
+|---|---|
+| **Bharathithasan S** | AI security hardening and repository maintenance; [documented parser and console security changes](https://github.com/bharathi12-hub/AEGIS-LLM-FIREWALL/commit/15618e93b408f85fab667af07137ad2241021bc7) |
+| **Ganesh M** | Gateway API and backend integration |
+| **Monish Tushar V.S** | Investigation console and user experience |
+
+These are role assignments for the project profile. They do not claim that each
+member authored the corresponding historical code or ran a particular test;
+the linked commit identifies Bharathithasan's documented security work.
 
 > **The money shot.** Under character-injection evasion (emoji-tag smuggling,
 > bidi, homoglyph, zero-width, base64), a single production-style classifier's
